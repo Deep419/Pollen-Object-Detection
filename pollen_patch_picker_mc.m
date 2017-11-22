@@ -1,15 +1,11 @@
-function gt_aug = pollen_patch_picker_mc (varargin)
+function gt_aug = pollen_patch_picker_mc (path, varargin)
 %%  This function will take input of which classes to consider, and will output
 %   a GT file with all of those classes combined in FRCNN format
-% FUTURE - Add subsetter - train/valid/test
+
 gt_aug = table();
 sz_ctr = 0;
-if strcmp(varargin{1},'all') == 1
-    if isunix
-        files = dir(fullfile('/users','dghaghar','research','data','pollen','patches','*','*_aug.mat'));
-    else
-        files = dir(fullfile('Z:','research','data','pollen','patches','*','*_aug.mat'));
-    end
+if strcmp(varargin{1},'all') == 1    
+        files = dir(fullfile(path,'patches','*','*_aug.mat'));    
     for i = 1:size(files,1)
         load([files(i).folder filesep files(i).name])
         id_name = strsplit(files(i).folder,filesep);
@@ -29,12 +25,8 @@ else
             folder = ['00' folder];
         elseif length(folder) == 2
             folder = ['0' folder];
-        end
-        if isunix
-            files = dir(fullfile('/users','dghaghar','research','data','pollen','patches',[folder '*'],'*_aug.mat'));
-        else
-            files = dir(fullfile('Z:','research','data','pollen','patches',[folder '*'],'*_aug.mat'));
-        end
+        end        
+        files = dir(fullfile(path,'patches',[folder '*'],'*_aug.mat'));        
         for ii = 1:size(files,1)
             load([files(ii).folder filesep files(ii).name])
             sz = height(data_aug);
@@ -42,12 +34,6 @@ else
             gt_aug.(id_name)(sz_ctr+1:sz_ctr+sz,1) = data_aug.bbox;
             sz_ctr = sz_ctr+ sz;
         end
-        %         fn = fullfile('patches',id_name '_aug.mat'];
-        %         load(fn);
-        %         sz = height(data_aug);
-        %         gt_aug.imageFilename(sz_ctr+1:sz_ctr+sz,1) = data_aug.imageFilename;
-        %         gt_aug.(id_name)(sz_ctr+1:sz_ctr+sz,1) = data_aug.bbox;
-        %         sz_ctr = sz_ctr+ sz;
     end
 end
 if isempty(strfind(gt_aug.imageFilename{1},'/'))
@@ -56,12 +42,3 @@ else
     gt_aug.imageFilename = strrep(gt_aug.imageFilename,'/',filesep);
 end
 end
-
-% function list = id_includer(input)
-%     list = {};
-%     input = strsplit(input,',');
-%     for i = 1:size(input,2)
-%         current = input{i};
-%         strfind(
-%     end
-% end
