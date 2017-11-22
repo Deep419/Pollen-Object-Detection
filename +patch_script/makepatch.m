@@ -1,4 +1,7 @@
 function makepatch(GT_data,i,bbox_intersection)
+%MAKEPATCH Divide images from big_images to smaller patches based on class 
+%   in patches folder
+
 
 id_num = GT_data.id{i};
 %if patch folder already exists, skip creating patches for that one

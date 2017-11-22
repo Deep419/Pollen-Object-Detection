@@ -1,6 +1,6 @@
 # README #
 
-This repo contains all the scripts that you will need to create pollen patches and calculate training metrics.
+This repo contains all the MATLAB scripts that you will need to create pollen patches and calculate training metrics.
 
 Steps : 
 

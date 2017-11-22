@@ -1,5 +1,4 @@
-% Dependency - +patch_script
-warning('off');
+%% Dependencies : +patch_script\* , +other_scripts\textprogressbar.m
 
 %% 1 Parameters to change
 %if more than 50% of a bounding box cropped by a cropping line it will be discarded
@@ -23,13 +22,13 @@ for i = 1:size(GT_data,1)
 end
 GT_data = sortrows(GT_data,'id','ascend');
 
-%% 3. Load Images and match sizes
+%% 3. Load Big Images
 images = dir(fullfile('big_image','*.tif'));
 if size(images,1)==0
      error('Please add images to big_image folder');
-     quit;
 end
-%% 4. Rename Image files
+
+%% 4. Rename Big Image files
 for i = 1:size(images,1)
     fn = images(i).name;
     nn = strrep(fn,' ','_');
@@ -39,20 +38,17 @@ for i = 1:size(images,1)
 end
 clear fn nn;
 
-%if size(GT_data,1) > size(images,1)
+%% 5. Start patch creating process
+if size(GT_data,1) < size(images,1)
+    error('gt_data.mat has less images than big_image folder.');
+else
     for i = 1:size(images,1)
-       idx = find(strcmp(['big_imag\' images(i).name],GT_data.imageFilename));
+       idx = find(strcmp(['big_image\' images(i).name],GT_data.imageFilename));
        if ~isempty(idx)           
             patch_script.makepatch(GT_data,idx,bbox_intersection)
        else
            warning('Image Not found.');
        end
-    end    
-% %elseif size(GT_data,1) == size(images,1)    
-%     for i=1:size(GT_data,1)
-%         patch_script.makepatch(GT_data,i,bbox_intersection)
-%     end
-% %else
-%     error('Number of Images in Big_Image folder do not match Size of GT.');
-% %end
+    end
+end
 disp('Function Completed');
