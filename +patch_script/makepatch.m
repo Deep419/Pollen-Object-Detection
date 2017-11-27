@@ -28,14 +28,26 @@ R(1)=floor(Row/rowLines);
 for k=2:rowLines-1
     R(k)=R(k-1)+floor(Row/rowLines);
 end
-R = [1 R Row]; clear k;
+% image do not have cropping lines
+if R(end) == Row
+    R = [1 Row]; clear k;
+% image has croppin lines
+else
+    R = [1 R Row]; clear k;
+end
 
 %create an array of Column cropping lines
 C(1)=floor(Column/columnLines);
 for k=2:columnLines-1
     C(k)=C(k-1)+floor(Column/columnLines);
 end
-C = [1 C Column]; clear k;
+% if image do not have cropping lines
+if C(end) == Column
+    C = [1 Column]; clear k;
+% image has cropping lines
+else
+    C = [1 C Column]; clear k;
+end
 
 x = mat2cell(I, diff([0 R(2:end)]) , diff([0 C(2:end)]) , 3);
 
