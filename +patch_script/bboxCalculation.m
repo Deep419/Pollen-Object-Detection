@@ -8,6 +8,12 @@
 % bbox_new - recalculated coordinates of the box
 
 function [bbox_new, extra] = bboxCalculation(box,C,R,bbox_intersection,bbox_new)
+% make sure that image boundaries do not crop bounding boxes
+C(1) = 0;
+R(1) = 0;
+C(end) = C(end)+2;
+R(end) = R(end)+2;
+
 extra = [];
 c_ar1 = box(1,1) < C;
 c_ar2 = (box(1,1)+box(1,3)) < C;
