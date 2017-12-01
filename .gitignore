@@ -1,2 +1,5 @@
 big_image/
 patches/
+log/
+*.e*
+*.o*
