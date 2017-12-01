@@ -43,7 +43,7 @@ if size(GT_data,1) < size(images,1)
     error('gt_data.mat has less images than big_image folder.');
 else
     for i = 1:size(images,1)
-       idx = find(strcmp(['big_image\' images(i).name],GT_data.imageFilename));
+       idx = find(strcmp(['big_image' filesep  images(i).name],GT_data.imageFilename));
        if ~isempty(idx)           
             patch_script.makepatch(GT_data,idx,bbox_intersection)
        else
