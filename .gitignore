@@ -3,3 +3,4 @@ patches/
 log/
 *.e*
 *.o*
+test.m
