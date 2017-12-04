@@ -53,7 +53,7 @@ for i = 1:height(trainingData)
             tp_gt = [tp_gt; trainingData.(trainingData.Properties.VariableNames{j}){i}(stats(i,j).GroundTruthAssignments(k),:)];
         end
     end
-    stats(i,j).dist = cal_f1_mc.bbox_dist(tp_gt, stats(i,j).TruePositive);
+    stats(i,j).dist = f1_multiclass.bbox_dist(tp_gt, stats(i,j).TruePositive);
     end
 end
 
