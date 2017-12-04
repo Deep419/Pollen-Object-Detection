@@ -1,5 +1,5 @@
 function makepatch(GT_data,i,bbox_intersection)
-%MAKEPATCH Divide images from big_images to smaller patches based on class 
+%MAKEPATCH Divide images from big_images to smaller patches based on class
 %   in patches folder
 
 
@@ -16,10 +16,17 @@ fprintf('Dividing %s : ',id_num);
 current_image = GT_data.imageFilename{i};
 I=imread(current_image);
 [Row, Column, ~]=size(I);
+minRC = min(Row,Column);
 
-rowLines = ceil(Row/1000); %number of lines dividing by height
-columnLines = ceil(Column/1000);  %number of lines dividing by width
-
+if minRC < 1000
+    numToDivide = minRC - rem(minRC,100);
+    rowLines = ceil(Row/numToDivide); %number of lines dividing by height
+    columnLines = ceil(Column/numToDivide);  %number of lines dividing by width
+    
+else
+    rowLines = ceil(Row/1000); %number of lines dividing by height
+    columnLines = ceil(Column/1000);  %number of lines dividing by width
+end
 %% 6. Create array of Row and Column Lines
 R = [];
 C = [];
@@ -31,7 +38,7 @@ end
 % image do not have cropping lines
 if R(end) == Row
     R = [1 Row]; clear k;
-% image has croppin lines
+    % image has croppin lines
 else
     R = [1 R Row]; clear k;
 end
@@ -44,7 +51,7 @@ end
 % if image do not have cropping lines
 if C(end) == Column
     C = [1 Column]; clear k;
-% image has cropping lines
+    % image has cropping lines
 else
     C = [1 C Column]; clear k;
 end
@@ -106,7 +113,7 @@ pollen = {};
 
 bbox = bbox';
 bbox = bbox(:);
-fprintf('done\n');
+fprintf('done | ');
 
 
 other_scripts.textprogressbar(sprintf('Creating patches for ID %s : ',id_num));

@@ -1,4 +1,7 @@
 %% Dependencies : +patch_script\* , +other_scripts\textprogressbar.m
+%% Parallel Setup
+clus = parcluster('local');
+pool = parpool('local',clus.NumWorkers);
 
 %% 1 Parameters to change
 %if more than 50% of a bounding box cropped by a cropping line it will be discarded
@@ -37,13 +40,14 @@ for i = 1:size(images,1)
     end
 end
 clear fn nn;
+images = dir(fullfile('big_image','*.tif'));
 
 %% 5. Start patch creating process
 if size(GT_data,1) < size(images,1)
     error('gt_data.mat has less images than big_image folder.');
 else
-    for i = 1:size(images,1)
-       idx = find(strcmp(['big_image' filesep  images(i).name],GT_data.imageFilename));
+    parfor i = 1:size(images,1)
+       idx = find(strcmp(['big_image' filesep  images(i).name],GT_data.imageFilename));      
        if ~isempty(idx)           
             patch_script.makepatch(GT_data,idx,bbox_intersection)
        else
@@ -51,4 +55,10 @@ else
        end
     end
 end
+
+delete(pool);
 disp('Function Completed');
+disp('Starting Testing');
+warning off;
+data = pollen_patch_picker_mc(pwd,'all');
+disp('Testing Complete');
