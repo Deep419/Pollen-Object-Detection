@@ -1,3 +1,4 @@
+%% Dependencies : +patch_script\id_includer.m
 function gt_aug = pollen_patch_picker_mc (path, varargin)
 %%  This function will take input of which classes to consider, and will output
 %   a GT file with all of those classes combined in FRCNN format
@@ -17,9 +18,9 @@ if strcmp(varargin{1},'all') == 1
         sz_ctr = sz_ctr+ sz;
     end
 else
-    %list = id_includer(varargin);
+    list = patch_script.id_includer(varargin);
     for i = 1:numel(list)
-        id_name = list{i};
+        id_name = list(i);
         folder = id_name(3:end);
         if length(folder) == 1
             folder = ['00' folder];
