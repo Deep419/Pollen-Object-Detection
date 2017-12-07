@@ -20,9 +20,9 @@ else
     for i = 1:numel(lista)
         if foundDash
             a = strsplit(list,'-');
-            ctr = [ctr str2num(a{1}):str2num(a{2})]
+            ctr = [ctr str2num(a{1}):str2num(a{2})];
         else
-            ctr = [ctr str2num(list)]
+            ctr = [ctr str2num(list)];
         end
     end
 end
