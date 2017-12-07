@@ -20,14 +20,15 @@ if strcmp(varargin{1},'all') == 1
 else
     list = patch_script.id_includer(varargin);
     for i = 1:numel(list)
-        id_name = list(i);
-        folder = id_name(3:end);
+        id_name = num2str(list(i));
+        folder = id_name;
         if length(folder) == 1
             folder = ['00' folder];
         elseif length(folder) == 2
             folder = ['0' folder];
         end        
-        files = dir(fullfile(path,'patches',[folder '*'],'*_aug.mat'));        
+        files = dir(fullfile(path,'patches',[folder '*'],'*_aug.mat'));
+        id_name = ['id_' id_name];
         for ii = 1:size(files,1)
             load([files(ii).folder filesep files(ii).name])
             sz = height(data_aug);
