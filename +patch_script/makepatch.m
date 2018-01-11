@@ -8,7 +8,8 @@ id_num = GT_data.id{i};
 folder_name = fullfile('patches',id_num);
 mkdir(folder_name);
 
-if exist(fullfile(folder_name,'gt_data_aug.mat')) == 2
+mat_exists = dir(fullfile(folder_name,'*.mat'));
+if ~isempty(mat_exists)
     fprintf('Patches already exists : %s\n',id_num);
     return;
 end

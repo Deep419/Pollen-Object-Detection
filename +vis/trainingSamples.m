@@ -1,10 +1,18 @@
 function [stats] = trainingSamples(params, data)
+dataSize = height(data);
+clus = parcluster('local');
+pool = parpool('local',clus.NumWorkers);
+disp(clus.NumWorkers)
 
 PARAM.por=params.PositiveOverlapRange;
 data = table2struct(data);
-stats.proposals = [];
-stats.miss = [];
-for imageCtr = 1:numel(data)
+
+proposals = zeros(dataSize);
+miss = zeros(dataSize);
+fprintf('Proposal Progress : ');
+
+parfor imageCtr = 1:dataSize    
+
     %for imageCtr=1:size(data,1)
     
     % varargin is 1 row of the ground truth table.
@@ -109,16 +117,22 @@ for imageCtr = 1:numel(data)
         img=I;
         img=insertShape(img,'rectangle',groundTruth,'Color','white');
         img=insertShape(img,'rectangle',P,'Color','red');
-        if ~isempty(missed)
-            img=insertShape(img,'rectangle',groundTruth(missed,:),'Color','green','LineWidth',10);
-        end
-        fn = sprintf('%s/%d_p_%d_m_%d_%s',params.vis_prop,imageCtr,size(P,1),size(missed,1),filename);
-        stats.proposals = [stats.proposals size(P,1)];
-        stats.miss = [stats.miss size(missed,1)];
-        black_img = zeros(2,2,3);
-        if ~isempty(missed)
-            imwrite( black_img , fn );
-        end
+%         if ~isempty(missed)
+%             img=insertShape(img,'rectangle',groundTruth(missed,:),'Color','green','LineWidth',10);
+%         end
+%         fn = sprintf('%s/%d_p_%d_m_%d_%s',params.vis_prop,imageCtr,size(P,1),size(missed,1),filename);
+        proposals(imageCtr) = size(P,1);
+        miss(imageCtr) = size(missed,1);
+%         black_img = zeros(2,2,3);
+%         if ~isempty(missed)
+%             imwrite( black_img , fn );
+%         end
+    
+%     fprintf(repmat('\b',[1 12]));
     end
 end
+stats.proposals = proposals;
+stats.miss = miss;
+delete(pool);
+
 end
