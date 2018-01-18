@@ -8,7 +8,10 @@ bbox_intersection = 0.5;
 load(['big_image' filesep 'GT_data.mat']);
 GT_data.Properties.VariableNames{1} = 'imageFilename';
 GT_data.imageFilename = strrep(GT_data.imageFilename,' ','_');
-GT_data.imageFilename = fullfile('big_image',GT_data.imageFilename);
+test_name = GT_data.imageFilename{1};
+if test_name(1:9)~='big_image' 
+	GT_data.imageFilename = fullfile('big_image',GT_data.imageFilename);
+end
 %make sure id_num has 3 digits with leading 0's
 for i = 1:size(GT_data,1)
     curr_id = GT_data.id{i};
@@ -47,9 +50,9 @@ clus = parcluster('local');
 pool = parpool('local',clus.NumWorkers);
 disp(clus.NumWorkers)
 %% 5. Start patch creating process
-if size(GT_data,1) < size(images,1)
-    error('gt_data.mat has less images than big_image folder.');
-else
+%if size(GT_data,1) < size(images,1)
+%    error('gt_data.mat has less images than big_image folder.');
+%else
     parfor i = 1:size(images,1)
        idx = find(strcmp(['big_image' filesep  images(i).name],GT_data.imageFilename));      
        if ~isempty(idx)           
@@ -58,7 +61,7 @@ else
            warning('Image Not found.');
        end
     end
-end
+%end
 
 delete(pool);
 disp('Function Completed');
