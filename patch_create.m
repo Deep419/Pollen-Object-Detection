@@ -1,4 +1,5 @@
 %% Dependencies : +patch_script\* , +other_scripts\textprogressbar.m
+%% Last Version Verified : R2018a
 
 %% 1 Parameters to change
 %if more than 50% of a bounding box cropped by a cropping line it will be discarded
