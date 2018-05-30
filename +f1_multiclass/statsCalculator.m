@@ -1,4 +1,4 @@
-function [averagePrecision, recall, precision, stats] = statsCalculator(...
+function [averagePrecision, recall, precision, stats, conf_info] = statsCalculator(...
     detectionResults, trainingData, varargin)
 %statsCalculator Evaluate the precision metric for object detection.
 %   averagePrecision = evaluateDetectionPrecision(detectionResults,
@@ -40,24 +40,98 @@ end
 
 % Match the detection results with ground truth
 stats = vision.internal.detector.evaluateDetection(detectionResults, trainingData, threshold);
+classList = trainingData.Properties.VariableNames;
 
-for i = 1:height(trainingData)
-    for j = 1:width(trainingData)
-    missed = ismember((1:stats(i,j).NumExpected)',stats(i,j).GroundTruthAssignments)==0;
-    stats(i,j).FalseNegative=trainingData.(trainingData.Properties.VariableNames{j}){i}(missed,:);
-    stats(i,j).TruePositive = stats(i,j).Detections(stats(i,j).labels==1,:);
-    stats(i,j).FalsePositive = stats(i,j).Detections(stats(i,j).labels==0,:);
-    tp_gt = [];
-    for k = 1:size(stats(i,j).GroundTruthAssignments,1)
-        if ~isnan(stats(i,j).GroundTruthAssignments(k))
-            tp_gt = [tp_gt; trainingData.(trainingData.Properties.VariableNames{j}){i}(stats(i,j).GroundTruthAssignments(k),:)];
+% This returns col number for each row thats not empty. i.e class serial
+% number.
+[~,col] = ind2sub([height(trainingData) width(trainingData)],find(~cellfun(@isempty,table2cell(trainingData))));
+
+conf_mat = zeros(width(trainingData)+1,width(trainingData)+1);
+%numExpected = zeros(height(trainingData),1);
+low_iou_or_floating_pred = zeros(1,width(trainingData));
+missed_gt = zeros(width(trainingData),1);
+
+for i = 1:height(trainingData) % I = image counter
+%     for j = 1:width(trainingData)
+%         numExpected(j) = numExpected(j) + stats(i,j).NumExpected;
+%     end
+    for j = 1:width(trainingData) % J = class counter
+        current_stats = stats(i,j);
+        gtBoxPerClass = trainingData.(trainingData.Properties.VariableNames{j}){i};
+        %detPerClass = current_stats.Detections;
+        if ~isempty(gtBoxPerClass)
+            iou = bboxOverlapRatio(gtBoxPerClass, detectionResults.Boxes{i}, 'union');
+            for k = 1:size(iou,1)
+                [v, ~] = max( iou(k,:) );
+                if v < 0.5
+                    missed_gt(j,1) = missed_gt(j,1) + 1;
+                end
+            end
         end
-    end
-    stats(i,j).dist = f1_multiclass.bbox_dist(tp_gt, stats(i,j).TruePositive);
+        low_iou_or_floating_pred(j) = low_iou_or_floating_pred(j) + sum(isnan(current_stats.GroundTruthAssignments));
+        conf_mat(j,j) = conf_mat(j,j) + sum(~isnan(current_stats.GroundTruthAssignments));
+        if isempty(current_stats.GroundTruthAssignments)
+            conf_mat(col(i),j) = conf_mat(col(i),j) + size(current_stats.Detections,1);
+        end
+        %         missed = ismember((1:stats(i,j).NumExpected)',stats(i,j).GroundTruthAssignments)==0;
+        %         stats(i,j).FalseNegative=trainingData.(trainingData.Properties.VariableNames{j}){i}(missed,:);
+        %         stats(i,j).TruePositive = stats(i,j).Detections(stats(i,j).labels==1,:);
+        %         stats(i,j).FalsePositive = stats(i,j).Detections(stats(i,j).labels==0,:);
+        %         tp_gt = [];
+        %         for k = 1:size(stats(i,j).GroundTruthAssignments,1)
+        %             if ~isnan(stats(i,j).GroundTruthAssignments(k))
+        %                 tp_gt = [tp_gt; trainingData.(trainingData.Properties.VariableNames{j}){i}(stats(i,j).GroundTruthAssignments(k),:)];
+        %             end
+        %         end
+        temp = [];
+        for g = 1:numel(current_stats.GroundTruthAssignments)
+            if ~isnan(current_stats.GroundTruthAssignments(g))
+                temp = [temp current_stats.GroundTruthAssignments(g)];
+            end
+        end
+        truePositiveDetections = current_stats.Detections(~isnan(current_stats.GroundTruthAssignments),:);
+        truePositiveGT = gtBoxPerClass(temp,:);
+        stats(i,j).dist = f1_multiclass.bbox_dist(truePositiveGT, truePositiveDetections);
     end
 end
 
+%% Adds missed groundtruth boxes and floating or low IoU detections to confusion matrix
+for i = 1:size(low_iou_or_floating_pred,2)
+    conf_mat(end,i) = low_iou_or_floating_pred(i);
+end
+for i = 1:size(missed_gt,1)
+    conf_mat(i,end) = missed_gt(i);
+end
 
+
+%% New Section - Computes TPR, FPR, FNR from the confusion matrix
+conf_info.confusion_matrix = conf_mat;
+conf_info.tpr = zeros(width(trainingData),1);
+conf_info.fpr_overall = zeros(width(trainingData),1);
+conf_info.fpr_wrongClass = zeros(width(trainingData),1);
+conf_info.fpr_lowIoU = zeros(width(trainingData),1);
+conf_info.fnr_overall = zeros(width(trainingData),1);
+conf_info.fnr_wrongClass = zeros(width(trainingData),1);
+conf_info.fnr_lowIoU = zeros(width(trainingData),1);
+for i = 1:size(conf_mat,1)-1
+%     for j = 1:size(conf_mat,2)-1
+%         if (i==j)
+            conf_info.tpr(i) = conf_mat(i,i)/sum(conf_mat(i,:));
+            
+            conf_info.fpr_overall(i) = ( sum(conf_mat(:,i)) - conf_mat(i,i) ) / sum(conf_mat(:,i));
+            conf_info.fpr_wrongClass(i) = ( sum(conf_mat(:,i)) - conf_mat(i,i) - conf_mat(end,i) ) / sum(conf_mat(:,i));
+            conf_info.fpr_lowIoU(i) = ( conf_mat(end,i) ) / sum(conf_mat(:,i));
+            
+            conf_info.fnr_overall(i) = ( sum(conf_mat(i,:)) - conf_mat(i,i) ) / sum(conf_mat(i,:));
+            conf_info.fnr_wrongClass(i) = ( sum(conf_mat(i,:)) - conf_mat(i,i) - conf_mat(i,end) ) / sum(conf_mat(i,:));
+            conf_info.fnr_lowIoU(i) = ( conf_mat(i,end) ) / sum(conf_mat(i,:));
+%         end
+%     end
+end
+
+
+
+%% Old Section - Computes P, R, F1
 numClasses = width(trainingData);
 averagePrecision = zeros(numClasses, 1);
 precision        = cell(numClasses, 1);
