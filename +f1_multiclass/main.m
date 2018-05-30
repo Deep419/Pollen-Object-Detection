@@ -1,8 +1,9 @@
-function [avg_f1,info] = ...
+function [avg_f1,info, conf] = ...
     main ( detectData, detector, nsr, imWriteFlag, varargin )
 
 % Avg f1 = Average of multiclass F1 scores
 % info = Individual Class AP,Precision,Recall,F1
+% conf = Confusion Matrix Analysis
 % imWriteFlag = If want to print visualizations/detection results
 % varagin = if printing results, directory to print in
 
