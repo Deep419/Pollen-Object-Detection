@@ -4,9 +4,10 @@
 # ===== PBS OPTIONS =====
 #
 #PBS -N "parallel_patch_creator"
-#PBS -q titan
+#PBS -q copperhead
 #PBS -l walltime=400:00:00
-#PBS -l nodes=1:ppn=8
+#PBS -l nodes=1:ppn=16:gpus=1
+#PBS -l mem=32GB
 #PBS -V
 #
 # ===== END PBS OPTIONS =====
