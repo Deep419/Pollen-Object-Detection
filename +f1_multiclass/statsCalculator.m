@@ -6,7 +6,7 @@ function [averagePrecision, recall, precision, stats, conf_info] = statsCalculat
 %   performance. For a multi-class detector, averagePrecision is a vector
 %   of average precision scores for each object class. The class order
 %   follows the same column order as the groundTruthData table.
-% 
+%
 %   Inputs:
 %   -------
 %   detectionResults  - a table that has two columns for single-class
@@ -25,7 +25,7 @@ function [averagePrecision, recall, precision, stats, conf_info] = statsCalculat
 %                       contains M-by-4 matrices of [x, y, width, height]
 %                       bounding boxes specifying object locations. The
 %                       column name specifies the class label.
-%  
+%
 %   [..., recall, precision] = evaluateDetectionPrecision(...) returns data
 %   points for plotting the precision/recall curve. You can visualize the
 %   performance curve using plot(recall, precision). For multi-class
@@ -36,12 +36,20 @@ function [averagePrecision, recall, precision, stats, conf_info] = statsCalculat
 %   overlap threshold for assigning a detection to a ground truth box. The
 %   overlap ratio is computed as the intersection over union. The default
 %   value is 0.5.
+v = ver('vision');
 
 narginchk(2, 3);
 
 % Validate user inputs
-vision.internal.detector.evaluationInputValidation(detectionResults, ...
-    trainingData, mfilename, true, varargin{:});
+if v.Version == '8.1'
+    vision.internal.detector.evaluationInputValidation(detectionResults, ...
+        trainingData, mfilename, true, varargin{:});
+elseif v.Version == '8.0'
+    vision.internal.detector.evaluationInputValidation(detectionResults, ...
+        trainingData, mfilename, varargin{:});
+else
+    error('statsCalculator requires vertion verification');
+end
 
 % Hit/miss threshold for IOU (intersection over union) metric
 threshold = 0.5;
@@ -58,14 +66,10 @@ classList = trainingData.Properties.VariableNames;
 [~,col] = ind2sub([height(trainingData) width(trainingData)],find(~cellfun(@isempty,table2cell(trainingData))));
 
 conf_mat = zeros(width(trainingData)+1,width(trainingData)+1);
-%numExpected = zeros(height(trainingData),1);
 low_iou_or_floating_pred = zeros(1,width(trainingData));
 missed_gt = zeros(width(trainingData),1);
 
 for i = 1:height(trainingData) % I = image counter
-%     for j = 1:width(trainingData)
-%         numExpected(j) = numExpected(j) + stats(i,j).NumExpected;
-%     end
     for j = 1:width(trainingData) % J = class counter
         current_stats = stats(i,j);
         gtBoxPerClass = trainingData.(trainingData.Properties.VariableNames{j}){i};
@@ -84,16 +88,6 @@ for i = 1:height(trainingData) % I = image counter
         if isempty(current_stats.GroundTruthAssignments)
             conf_mat(col(i),j) = conf_mat(col(i),j) + size(current_stats.Detections,1);
         end
-        %         missed = ismember((1:stats(i,j).NumExpected)',stats(i,j).GroundTruthAssignments)==0;
-        %         stats(i,j).FalseNegative=trainingData.(trainingData.Properties.VariableNames{j}){i}(missed,:);
-        %         stats(i,j).TruePositive = stats(i,j).Detections(stats(i,j).labels==1,:);
-        %         stats(i,j).FalsePositive = stats(i,j).Detections(stats(i,j).labels==0,:);
-        %         tp_gt = [];
-        %         for k = 1:size(stats(i,j).GroundTruthAssignments,1)
-        %             if ~isnan(stats(i,j).GroundTruthAssignments(k))
-        %                 tp_gt = [tp_gt; trainingData.(trainingData.Properties.VariableNames{j}){i}(stats(i,j).GroundTruthAssignments(k),:)];
-        %             end
-        %         end
         temp = [];
         for g = 1:numel(current_stats.GroundTruthAssignments)
             if ~isnan(current_stats.GroundTruthAssignments(g))
@@ -125,19 +119,15 @@ conf_info.fnr_overall = zeros(width(trainingData),1);
 conf_info.fnr_wrongClass = zeros(width(trainingData),1);
 conf_info.fnr_lowIoU = zeros(width(trainingData),1);
 for i = 1:size(conf_mat,1)-1
-%     for j = 1:size(conf_mat,2)-1
-%         if (i==j)
-            conf_info.tpr(i) = conf_mat(i,i)/sum(conf_mat(i,:));
-            
-            conf_info.fpr_overall(i) = ( sum(conf_mat(:,i)) - conf_mat(i,i) ) / sum(conf_mat(:,i));
-            conf_info.fpr_wrongClass(i) = ( sum(conf_mat(:,i)) - conf_mat(i,i) - conf_mat(end,i) ) / sum(conf_mat(:,i));
-            conf_info.fpr_lowIoU(i) = ( conf_mat(end,i) ) / sum(conf_mat(:,i));
-            
-            conf_info.fnr_overall(i) = ( sum(conf_mat(i,:)) - conf_mat(i,i) ) / sum(conf_mat(i,:));
-            conf_info.fnr_wrongClass(i) = ( sum(conf_mat(i,:)) - conf_mat(i,i) - conf_mat(i,end) ) / sum(conf_mat(i,:));
-            conf_info.fnr_lowIoU(i) = ( conf_mat(i,end) ) / sum(conf_mat(i,:));
-%         end
-%     end
+    conf_info.tpr(i) = conf_mat(i,i)/sum(conf_mat(i,:));
+    
+    conf_info.fpr_overall(i) = ( sum(conf_mat(:,i)) - conf_mat(i,i) ) / sum(conf_mat(:,i));
+    conf_info.fpr_wrongClass(i) = ( sum(conf_mat(:,i)) - conf_mat(i,i) - conf_mat(end,i) ) / sum(conf_mat(:,i));
+    conf_info.fpr_lowIoU(i) = ( conf_mat(end,i) ) / sum(conf_mat(:,i));
+    
+    conf_info.fnr_overall(i) = ( sum(conf_mat(i,:)) - conf_mat(i,i) ) / sum(conf_mat(i,:));
+    conf_info.fnr_wrongClass(i) = ( sum(conf_mat(i,:)) - conf_mat(i,i) - conf_mat(i,end) ) / sum(conf_mat(i,:));
+    conf_info.fnr_lowIoU(i) = ( conf_mat(i,end) ) / sum(conf_mat(i,:));
 end
 
 
@@ -154,8 +144,14 @@ for c = 1 : numClasses
     labels = vertcat(stats(:,c).labels);
     scores = vertcat(stats(:,c).scores);
     numExpected = sum([stats(:,c).NumExpected]);
-    
-    [ap, p, r] = vision.internal.detector.detectorPrecisionRecall(labels, numExpected, scores);
+    % Validate user inputs
+    if v.Version == '8.1'
+        [ap, p, r] = vision.internal.detector.detectorPrecisionRecall(labels, numExpected, scores);
+    elseif v.Version == '8.0'
+        [ap, p, r] = vision.internal.detector.detectorPrecisionRecall(labels, scores, numExpected);
+    else
+        error('statsCalculator requires vertion verification');
+    end
     
     averagePrecision(c) = ap;
     precision{c} = p;
