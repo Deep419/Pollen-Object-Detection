@@ -5,8 +5,8 @@
 #
 #PBS -N "parallel_patch_creator"
 #PBS -q copperhead
-#PBS -l walltime=400:00:00
-#PBS -l nodes=1:ppn=16:gpus=1
+#PBS -l walltime=8:00:00
+#PBS -l nodes=1:ppn=32
 #PBS -l mem=32GB
 #PBS -V
 #
@@ -17,5 +17,5 @@ cd $PBS_O_WORKDIR
 mkdir log
 {
 module load matlab/R2017a
-matlab -nodisplay -nosplash -nodesktop -r "patch_create; exit;"
+matlab -nodisplay -nosplash -nodesktop -r "patch_create('PSO'); exit;"
 } > log/output_"$PBS_JOBNAME"_$PBS_JOBID 2>log/errorLog_"$PBS_JOBNAME"_$PBS_JOBID
