@@ -1,4 +1,7 @@
 function ctr = id_includer(varargin)
+%%ID_INCLUDER this script makes selecting classes/ID more flexible when
+%%training multi-class frcnn model.
+
 lista = varargin{1};
 list = lista{1};
 foundComma = strfind(list,',');
