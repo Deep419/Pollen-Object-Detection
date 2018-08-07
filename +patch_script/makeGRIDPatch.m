@@ -1,11 +1,11 @@
-function makepatch(GT_data,i,bbox_intersection)
-%MAKEPATCH Divide images from big_images to smaller patches based on class
+function makeGRIDPatch(GT_data,i,bbox_intersection)
+%makeGRIDPatch Divide images from big_images to smaller patches based on class
 %   in patches folder
 
 
 id_num = GT_data.id{i};
 %if patch folder already exists, skip creating patches for that one
-folder_name = fullfile('patches',id_num);
+folder_name = fullfile('grid_patches',id_num);
 mkdir(folder_name);
 
 mat_exists = dir(fullfile(folder_name,'*.mat'));
