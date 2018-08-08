@@ -21,20 +21,40 @@ I=imread(current_image);
 box = GT_data.bbox{idx};
 
 %% clip patchBox larger than I
+
+%special case: if patchBox starts on last X or Y of image, remove it 
+% completely so it doesnt end up with 0 W or H
+patchBox( patchBox(:,1) == Column , : ) = [];
+patchBox( patchBox(:,2) == Row , : ) = [];
+
+%Perform clipping on patchBox
 high_c = find(patchBox(:,1)+patchBox(:,3) >= Column);
 patchBox(high_c,3) = Column - patchBox(high_c,1);
 
 high_r = find(patchBox(:,2)+patchBox(:,4) >= Row);
 patchBox(high_r,4) = Row - patchBox(high_r,2);
 
+%Perform clipping on box / GT -Not required though
 high_c = find(box(:,1)+box(:,3) >= Column);
 box(high_c,3) = Column - box(high_c,1);
 
 high_r = find(box(:,2)+box(:,4) >= Row);
 box(high_r,4) = Row - box(high_r,2);
 
+% Remove negative/0 H W box and patchBox --sanity check
+patchBox(patchBox(:,3)<1,:) = [];
+patchBox(patchBox(:,4)<1,:) = [];
+box(box(:,3)<1,:) = [];
+box(box(:,4)<1,:) = [];
+
 %% BBOx Overlap
 iou = bboxOverlapRatio(patchBox,box,'Min');
+ 
+% %remove empty patchBox
+emptyPatchBox = max(iou,[],2) == 0;
+
+iou(emptyPatchBox,:) = [];
+patchBox(emptyPatchBox,:) = [];
 
 numPatches = size(patchBox,1);
 

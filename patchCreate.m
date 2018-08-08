@@ -66,14 +66,14 @@ disp(clus.NumWorkers)
 %else
 if type=='PSO'
     load(fullfile('misc_mat_data','final_pso_table.mat'));
-    for i = 1:size(images,1)
+    parfor i = 1:size(images,1)
         idx = find(strcmp(['big_image' filesep  images(i).name],GT_data.imageFilename));
         if ~isempty(idx)
             %% IDX = 21, J = best optBox
             gc = cell2mat(final_table.final{idx,1}.grain_cut);
-            [maxValue,j] = max(gc);
-            j= find(gc == maxValue,1,'first');
-            clear gc maxValue;
+%             [maxValue,j] = max(gc);
+            j= find(gc >= 0.99,1,'first');
+            clear gc;% maxValue;
             patchBoxes = final_table.final{idx,1}.optimalBboxes{j,1};
             patch_script.makePSOPatch(GT_data,idx,bbox_intersection,patchBoxes)
             

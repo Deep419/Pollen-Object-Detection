@@ -1,5 +1,5 @@
 big_image/
-patches/
+*patches/
 log/
 *.e*
 *.o*
