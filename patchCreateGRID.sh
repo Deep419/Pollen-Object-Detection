@@ -3,7 +3,7 @@
 #
 # ===== PBS OPTIONS =====
 #
-#PBS -N "parallel_patch_creator"
+#PBS -N "parPatchGenerate"
 #PBS -q copperhead
 #PBS -l walltime=8:00:00
 #PBS -l nodes=1:ppn=32
@@ -16,6 +16,6 @@
 cd $PBS_O_WORKDIR
 mkdir log
 {
-module load matlab/R2017a
-matlab -nodisplay -nosplash -nodesktop -r "patch_create('PSO'); exit;"
+module load matlab/R2018a
+matlab -nodisplay -nosplash -nodesktop -r "patch_create('GRID'); exit;"
 } > log/output_"$PBS_JOBNAME"_$PBS_JOBID 2>log/errorLog_"$PBS_JOBNAME"_$PBS_JOBID
