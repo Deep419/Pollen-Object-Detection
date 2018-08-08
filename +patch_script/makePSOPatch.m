@@ -148,7 +148,7 @@ for aug_i = 1:4:size(patchBox_imgs,1)*4%15000
     bbox_per = bbox{ceil(aug_i/4)};
     [Row,Column,~] = size(patch_image);
     %[R,C,~]=size(I);
-    fn = [loc '0' '.png'];
+    fn = [loc '0' '.jpg'];
     imageFilename{aug_i,1} = fn;
     pollen{aug_i,1} = bbox_per;
     %figure;imshow(insertShape(I,'rectangle',bbox));
@@ -160,7 +160,7 @@ for aug_i = 1:4:size(patchBox_imgs,1)*4%15000
         bbox_down = [bbox_per(:,1) Row-(bbox_per(:,2)+bbox_per(:,4)-2) bbox_per(:,3) bbox_per(:,4)];
     end
     %figure;imshow(insertShape(I_down,'rectangle',bbox_down));
-    fn = [loc 'ud' '.png'];
+    fn = [loc 'ud' '.jpg'];
     imageFilename{aug_i+1,1} = fn;
     pollen{aug_i+1,1} = bbox_down;
     imwrite(I_down,fn);
@@ -171,7 +171,7 @@ for aug_i = 1:4:size(patchBox_imgs,1)*4%15000
         bbox_side = [Column-(bbox_per(:,1)+bbox_per(:,3)-2) bbox_per(:,2) bbox_per(:,3) bbox_per(:,4)];
     end
     %figure;imshow(insertShape(I_side,'rectangle',bbox_side));
-    fn = [loc 'lr' '.png'];
+    fn = [loc 'lr' '.jpg'];
     imageFilename{aug_i+2,1} = fn;
     pollen{aug_i+2,1} = bbox_side;
     imwrite(I_side,fn);
@@ -182,7 +182,7 @@ for aug_i = 1:4:size(patchBox_imgs,1)*4%15000
         bbox_diag = [Column-(bbox_down(:,1)+bbox_down(:,3)-2) bbox_down(:,2) bbox_down(:,3) bbox_down(:,4)];
     end
     %figure;imshow(insertShape(I_diag,'rectangle',bbox_diag));
-    fn = [loc 'diag' '.png'];
+    fn = [loc 'diag' '.jpg'];
     imageFilename{aug_i+3,1} = fn;
     pollen{aug_i+3,1} = bbox_diag;
     imwrite(I_diag,fn);
@@ -194,7 +194,7 @@ other_scripts.textprogressbar('done');
 bbox = pollen; clear pollen;
 data_aug = table(imageFilename, bbox);
 
-imwrite(img,fullfile(folder_name,['vis_big-' id_num '.png']));
+imwrite(img,fullfile(folder_name,['vis_big-' id_num '.jpg']));
 save(fullfile(folder_name,'gt_data_aug.mat'), 'data_aug');
 end
 
