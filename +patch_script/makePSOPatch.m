@@ -96,7 +96,7 @@ for i = 1:numPatches
     if ~isempty(gt_list)
         [modified_gt_list,extraList] = intersect_clip(patchBox(i,:),gt_list);
         patchBox_gt{i} = [patchBox_gt{i};modified_gt_list];
-        patchBox_extra{i} = [patchBox_extra{i};extraList];
+%         patchBox_extra{i} = [patchBox_extra{i};extraList];
     end
     
 %     if ~isempty(patchBox_extra{i})
@@ -120,13 +120,13 @@ for i = 1:numPatches
     gt_list(:,1) = gt_list(:,1) + x;
     gt_list(:,2) = gt_list(:,2) + y;
     img = insertShape(img,'rectangle',gt_list,'LineWidth',8,'Color',color(i,:));
-    if ~isempty(patchBox_extra{i})
-        for j = 1:size(patchBox_extra{i},1)
-            b = patchBox_extra{i}(j,:);
-            b(isnan(b)) = [];
-            img = insertShape(img,'polygon',b,'LineWidth',8,'Color','black');
-        end
-    end
+%     if ~isempty(patchBox_extra{i})
+%         for j = 1:size(patchBox_extra{i},1)
+%             b = patchBox_extra{i}(j,:);
+%             b(isnan(b)) = [];
+%             img = insertShape(img,'polygon',b,'LineWidth',8,'Color','black');
+%         end
+%     end
 end
 %figure;imshow(img);
 
@@ -220,12 +220,12 @@ for i = 1:size(gt_list,1)
     h = round(max(polyPoints(:, 2))) - y;
     newList = [newList; [max(1,x-p_x) max(1,y-p_y) w h]];
     
-    %Extra
-    out = xor(a1,a2);
-    extra_poly = out.subtract(a1);
-    vrtx = extra_poly.Vertices;
-    % Pad with 0(nan later) to retain matrix size
-    extraList(i,:) = padarray(reshape(vrtx',1,size(vrtx,1)*2),[0 12 - numel(vrtx)],'post');
+%     %Extra
+%     out = xor(a1,a2);
+%     extra_poly = out.subtract(a1);
+%     vrtx = extra_poly.Vertices;
+%     % Pad with 0(nan later) to retain matrix size
+%     extraList(i,:) = padarray(reshape(vrtx',1,size(vrtx,1)*2),[0 12 - numel(vrtx)],'post');
 end
 extraList(extraList==0) = nan;
 % figure;imshow(insertShape(I,'rectangle',newList,'LineWidth',1,'Color',255*jet(8)));
