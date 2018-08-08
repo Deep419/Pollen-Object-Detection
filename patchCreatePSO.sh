@@ -17,5 +17,5 @@ cd $PBS_O_WORKDIR
 mkdir log
 {
 module load matlab/R2018a
-matlab -nodisplay -nosplash -nodesktop -r "patch_create('PSO'); exit;"
+matlab -nodisplay -nosplash -nodesktop -r "patchCreate('PSO'); exit;"
 } > log/output_"$PBS_JOBNAME"_$PBS_JOBID 2>log/errorLog_"$PBS_JOBNAME"_$PBS_JOBID
