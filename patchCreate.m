@@ -65,23 +65,23 @@ disp(clus.NumWorkers)
 %    error('gt_data.mat has less images than big_image folder.');
 %else
 if type=='PSO'
-    load(fullfile('misc_mat_data','final_pso_table.mat'));
+    f = load(fullfile('misc_mat_data','final_pso_table.mat'));
     parfor i = 1:size(images,1)
         idx = find(strcmp(['big_image' filesep  images(i).name],GT_data.imageFilename));
         if ~isempty(idx)
             %% IDX = 21, J = best optBox
-            gc = cell2mat(final_table.final{idx,1}.grain_cut);
+            gc = cell2mat(f.final_table.final{idx,1}.grain_cut);
 %             [maxValue,j] = max(gc);
             j= find(gc >= 0.99,1,'first');
-            clear gc;% maxValue;
-            patchBoxes = final_table.final{idx,1}.optimalBboxes{j,1};
+            %clear gc maxValue;
+            patchBoxes = f.final_table.final{idx,1}.optimalBboxes{j,1};
             patch_script.makePSOPatch(GT_data,idx,bbox_intersection,patchBoxes)
             
         else
             warning('Image Not found.');
         end
     end
-elseif type=='GRID'
+elseif type=='GRI'
     parfor i = 1:size(images,1)
         idx = find(strcmp(['big_image' filesep  images(i).name],GT_data.imageFilename));
         if ~isempty(idx)
