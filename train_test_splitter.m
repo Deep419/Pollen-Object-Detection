@@ -1,84 +1,99 @@
 function [trainSet, validSet, testSet, T] = train_test_splitter(data)
 
-del_mat = [];
-%delete empty rows
-for i = 1:size(data,1)
-    if ~numel(find(~cellfun('isempty',data{i,2:end})))
-        del_mat = [del_mat i];
-    end
-end
-data(del_mat,:) = [];
 
-%splits in 60-20-20
-numClasses = size(data,2)-1;
-sz_ctr = 0;
-for i = 2:numClasses+1
-    sz = numel(find(~cellfun('isempty',data{:, i})));
+%% delete empty rows
+del_ones = ~max(~cellfun('isempty',data{:,2:end}),[],2);
+data(del_ones,:) = [];
+
+%% splits in 60-20-20
+
+logical_data = ~cellfun('isempty',data{:,:});
+%vector of total patches per class
+freq = sum(logical_data,1);
+uniq_freq = freq./4; %vector of total UNIQUE patches per class
+numClasses = size(freq,2)-1;
+start_idx(1) = 0;
+end_idx(1) = 0;
+for i = 2:size(freq,2)
+    temp = find(logical_data(:,i));
+    start_idx(i) = temp(1); %starting index in Data where class i images start
+    end_idx(i) = temp(end); %starting index in Data where class i images end
+end
+clear temp;
+
+test_freq = round(.2.*uniq_freq);
+train_freq = round(.6.*uniq_freq);
+valid_freq = round(.2.*uniq_freq);
+%if sum is greater than total unique freq, subtract 1 from valid
+extra = train_freq+valid_freq+test_freq > uniq_freq;
+valid_freq(extra) = valid_freq(extra) - 1;
+%if sum is lesser than total unique freq, add 1 to test
+extra = train_freq+valid_freq+test_freq < uniq_freq;
+test_freq(extra) = test_freq(extra) + 1;
+
+for i = 2:size(freq,2)
+    rng(42);
+    %relative randperm between 1 and uniqFreq#
+    temp = randperm(uniq_freq(i));
+    %Splits temp into 3 based on freq for train,valid,test
+    idx_splitted=mat2cell(temp,1,[train_freq(i) valid_freq(i) test_freq(i)]);
+    
+    %:4 to pick only original images (_0)
+    actual_range = start_idx(i) : 4 : end_idx(i);
+    
+    actual_train_idx = actual_range(idx_splitted{1});
+    %Augment Train set by including next 3 images, _dia, _lr, _ud
+    actual_train_idx(2,:) = actual_train_idx + 1;
+    actual_train_idx(3,:) = actual_train_idx(1,:) + 2;
+    actual_train_idx(4,:) = actual_train_idx(1,:) + 3;
+    actual_train_idx = actual_train_idx(:);
+    
+    actual_valid_idx = actual_range(idx_splitted{2});
+    %Augment Valid set by including next 3 images, _dia, _lr, _ud
+    actual_valid_idx(2,:) = actual_valid_idx + 1;
+    actual_valid_idx(3,:) = actual_valid_idx(1,:) + 2;
+    actual_valid_idx(4,:) = actual_valid_idx(1,:) + 3;
+    actual_valid_idx = actual_valid_idx(:);
+    
+    actual_test_idx = actual_range(idx_splitted{3});
+    
     if i == 2
-        trainSet = vertcat(data(sz_ctr+1:10:sz_ctr+sz,:), ...
-            data(sz_ctr+2:10:sz_ctr+sz,:), ...
-            data(sz_ctr+3:10:sz_ctr+sz,:), ...
-            data(sz_ctr+4:10:sz_ctr+sz,:), ...
-            data(sz_ctr+5:10:sz_ctr+sz,:), ...
-            data(sz_ctr+6:10:sz_ctr+sz,:));
-        
-        validSet = vertcat(data(sz_ctr+7:10:sz_ctr+sz,:), ...
-            data(sz_ctr+8:10:sz_ctr+sz,:));
-        
-        testSet = vertcat(data(sz_ctr+9:10:sz_ctr+sz,:), ...
-            data(sz_ctr+10:10:sz_ctr+sz,:));
+        trainSet = data(actual_train_idx,:);        
+        validSet = data(actual_valid_idx,:);        
+        testSet = data(actual_test_idx,:);
     else
-        trainSet = vertcat(trainSet,data(sz_ctr+1:10:sz_ctr+sz,:), ...
-            data(sz_ctr+2:10:sz_ctr+sz,:), ...
-            data(sz_ctr+3:10:sz_ctr+sz,:), ...
-            data(sz_ctr+4:10:sz_ctr+sz,:), ...
-            data(sz_ctr+5:10:sz_ctr+sz,:), ...
-            data(sz_ctr+6:10:sz_ctr+sz,:));
-        
-        validSet = vertcat(validSet,data(sz_ctr+7:10:sz_ctr+sz,:), ...
-            data(sz_ctr+8:10:sz_ctr+sz,:));
-        
-        testSet = vertcat(testSet,data(sz_ctr+9:10:sz_ctr+sz,:), ...
-            data(sz_ctr+10:10:sz_ctr+sz,:));
-    end
-    sz_ctr = sz_ctr + sz;
+        trainSet = vertcat(trainSet,data(actual_train_idx,:));
+        validSet = vertcat(validSet,data(actual_valid_idx,:));
+        testSet = vertcat(testSet,data(actual_test_idx,:));
+    end   
 end
 
-%to test frequencies
+%% to test frequencies
 array_test = {};
 array_valid = {};
 array_train = {};
 array_total = [];
 array_class = {};
+
+[nrows,~] = cellfun(@size,trainSet{:,:});
+sum_nrows_train = sum(nrows,1);
+[nrows,~] = cellfun(@size,validSet{:,:});
+sum_nrows_valid = sum(nrows,1);
+[nrows,~] = cellfun(@size,testSet{:,:});
+sum_nrows_test = sum(nrows,1);
+
 for i = 2:numClasses+1
     cur_class = testSet.Properties.VariableNames{i};
     array_class{i,1} = cur_class;
-    temp_ctr = 0;
-    temp_ctr_train = 0;
-    temp_ctr_valid = 0;
-    temp_ctr_test = 0;
-    for j = 1:size(data,1)
-        temp_ctr = temp_ctr+ size(data.(cur_class){j},1);
-    end
-    for j = 1:size(validSet,1)
-        temp_ctr_valid = temp_ctr_valid+ size(validSet.(cur_class){j},1);
-    end
-    for j = 1:size(trainSet,1)
-        temp_ctr_train = temp_ctr_train+ size(trainSet.(cur_class){j},1);
-    end
-    for j = 1:size(testSet,1)
-        temp_ctr_test = temp_ctr_test+ size(testSet.(cur_class){j},1);
-    end
-    array_test{i,1} = sprintf('%d (%.2f%%)',temp_ctr_test,(temp_ctr_test/temp_ctr)*100);
-    array_valid{i,1} = sprintf('%d (%.2f%%)',temp_ctr_valid,(temp_ctr_valid/temp_ctr)*100);
-    array_train{i,1} = sprintf('%d (%.2f%%)',temp_ctr_train,(temp_ctr_train/temp_ctr)*100);
-    array_total(i,1) = temp_ctr;
+    temp_ctr_train = sum_nrows_train(i);
+    temp_ctr_valid = sum_nrows_valid(i);
+    temp_ctr_test = sum_nrows_test(i);
+
+    array_test{i,1} = sprintf('%d ',temp_ctr_test);
+    array_valid{i,1} = sprintf('%d ',temp_ctr_valid);
+    array_train{i,1} = sprintf('%d ',temp_ctr_train);
 end
-array_percent = [];
-for i = 1:size(array_total,1)
-   array_percent(i,1) =  (array_total(i)/sum(array_total)) * 100;
-end
-T = table(array_class,array_train,array_valid,array_test,array_total,array_percent);
+T = table(array_class,array_train,array_valid,array_test);
 T(1,:) = [];
 T.Properties.Description = '# of Pollen Grains in Train/Valid/Test set for each class.';
-T.Properties.VariableNames = {'Class','Train','Valid','Test','Total','Percent_of_Total'};
+T.Properties.VariableNames = {'Class','Train','Valid','Test'};
