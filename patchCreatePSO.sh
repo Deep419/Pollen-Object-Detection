@@ -3,7 +3,7 @@
 #
 # ===== PBS OPTIONS =====
 #
-#PBS -N "parPatchGenerate"
+#PBS -N "parPatchGenPSO"
 #PBS -q copperhead
 #PBS -l walltime=8:00:00
 #PBS -l nodes=1:ppn=32
