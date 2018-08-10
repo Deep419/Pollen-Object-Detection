@@ -56,7 +56,7 @@ save(['big_image' filesep 'GT_data.mat'],'GT_data');
 
 %load(['big_image' filesep 'GT_data.mat']);
 images = dir(fullfile('big_image','*.tif'));
-
+%
 clus = parcluster('local');
 pool = parpool('local',clus.NumWorkers);
 disp(clus.NumWorkers)
@@ -71,12 +71,14 @@ if type=='PSO'
         if ~isempty(idx)
             %% IDX = 21, J = best optBox
             gc = cell2mat(f.final_table.final{idx,1}.grain_cut);
-%             [maxValue,j] = max(gc);
-            j= find(gc >= 0.99,1,'first');
+            ol = cell2mat(f.final_table.final{idx,1}.overlap);
+            %           [maxValue,j] = max(gc);
+            j= find(gc >= 0.99,3,'first');
+            [~,loc] = min(ol(j));
+            j = j(loc);
             %clear gc maxValue;
             patchBoxes = f.final_table.final{idx,1}.optimalBboxes{j,1};
             patch_script.makePSOPatch(GT_data,idx,bbox_intersection,patchBoxes)
-            
         else
             warning('Image Not found.');
         end
@@ -100,5 +102,9 @@ delete(pool);
 disp('Function Completed');
 disp('Starting Testing');
 warning off;
-data = pollen_patch_picker_mc(pwd,'all');
-disp('Testing Complete');
+data = pollen_patch_picker_mc(pwd,type,'all');
+if ~isempty(data)
+    disp('Testing Complete');
+else
+    error('patch_picker returned empty Data');
+end
