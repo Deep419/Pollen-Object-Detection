@@ -56,7 +56,7 @@ save(['big_image' filesep 'GT_data.mat'],'GT_data');
 
 %load(['big_image' filesep 'GT_data.mat']);
 images = dir(fullfile('big_image','*.tif'));
-%
+
 clus = parcluster('local');
 pool = parpool('local',clus.NumWorkers);
 disp(clus.NumWorkers)
@@ -71,7 +71,7 @@ if type=='PSO'
         if ~isempty(idx)
             %% IDX = 21, J = best optBox
             gc = cell2mat(f.final_table.final{idx,1}.grain_cut);
-            ol = cell2mat(f.final_table.final{idx,1}.overlap);
+            ol = cell2mat(f.final_table.final{idx,1}.overlap_mean);
             %           [maxValue,j] = max(gc);
             j= find(gc >= 0.99,3,'first');
             [~,loc] = min(ol(j));
