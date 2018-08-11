@@ -41,9 +41,12 @@ box(high_c,3) = Column - box(high_c,1);
 high_r = find(box(:,2)+box(:,4) >= Row);
 box(high_r,4) = Row - box(high_r,2);
 
-% Remove negative/0 H W box and patchBox --sanity check
-patchBox(patchBox(:,3)<1,:) = [];
-patchBox(patchBox(:,4)<1,:) = [];
+
+% Remove PatchBox  with H and W less than 100
+patchBox(patchBox(:,3)<100,:) = [];
+patchBox(patchBox(:,4)<100,:) = [];
+
+% Remove negative/0 H W box--sanity check
 box(box(:,3)<1,:) = [];
 box(box(:,4)<1,:) = [];
 
