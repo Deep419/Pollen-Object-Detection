@@ -22,7 +22,7 @@ box = GT_data.bbox{idx};
 
 %% clip patchBox larger than I
 
-%special case: if patchBox starts on last X or Y of image, remove it 
+%special case: if patchBox starts on last X or Y of image, remove it
 % completely so it doesnt end up with 0 W or H
 patchBox( patchBox(:,1) == Column , : ) = [];
 patchBox( patchBox(:,2) == Row , : ) = [];
@@ -52,7 +52,7 @@ box(box(:,4)<1,:) = [];
 
 %% BBOx Overlap
 iou = bboxOverlapRatio(patchBox,box,'Min');
- 
+
 % %remove empty patchBox
 emptyPatchBox = max(iou,[],2) == 0;
 
@@ -73,15 +73,8 @@ for i = 1:numPatches
     h = patchBox(i,4);
     patchBox_imgs{i} = I(y:(y + h)-1,x:(x + w)-1,:);
     
-    %% 100% Inside
-    gt_list = box(iou(i,:)==1,:);
-    if ~isempty(gt_list)
-        gt_list(:,1) = gt_list(:,1) - x;
-        gt_list(:,2) = gt_list(:,2) - y;
-    end
-    patchBox_gt{i} = [patchBox_gt{i};gt_list];
-    %% Between 100% and bbox_intersection
-    gt_list = box(iou(i,:)>=bbox_intersection & iou(i,:)<1,:);
+    %%  Greater than bbox_intersection
+    gt_list = box(iou(i,:)>=bbox_intersection,:);
 %     Debug intersect_clip
 %     gt_list
 %     I = uint8(255*zeros(1000,1000,3));
@@ -94,12 +87,12 @@ for i = 1:numPatches
 %         250 650 100 100 ; ...
 %         500 650 100 100 ; ...
 %         650 650 100 100];
-
+    
     %Clip these to edges
     if ~isempty(gt_list)
         [modified_gt_list,extraList] = intersect_clip(patchBox(i,:),gt_list);
         patchBox_gt{i} = [patchBox_gt{i};modified_gt_list];
-%         patchBox_extra{i} = [patchBox_extra{i};extraList];
+        %         patchBox_extra{i} = [patchBox_extra{i};extraList];
     end
     
 %     if ~isempty(patchBox_extra{i})
@@ -222,6 +215,24 @@ for i = 1:size(gt_list,1)
     w = round(max(polyPoints(:, 1))) - x;
     h = round(max(polyPoints(:, 2))) - y;
     newList = [newList; [max(1,x-p_x) max(1,y-p_y) w h]];
+    
+    %make sure GT is INSIDE patchBox --sanity check
+    for j = 1:size(newList,1)
+        current_gt = newList(j,:);
+        if current_gt(1) < 1
+            current_gt(1) = 1;
+        end
+        if current_gt(2) < 1
+            current_gt(2) = 1;
+        end
+        if current_gt(1) + current_gt(3) >= patchBox(3)
+            current_gt(3) = min(patchBox(3),(current_gt(1) + current_gt(3))-1);
+        end
+        if current_gt(2) + current_gt(4) >= patchBox(4)
+            current_gt(4) = min(patchBox(4),(current_gt(2) + current_gt(4))-1);
+        end
+        newList(j,:) = current_gt;
+    end
     
 %     %Extra
 %     out = xor(a1,a2);
