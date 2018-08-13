@@ -78,11 +78,7 @@ if type=='PSO'
             j = j(loc);
             %clear gc maxValue;            
             patchBoxes = f.final_table.final{idx,1}.optimalBboxes{j,1};
-            try
-                patch_script.makePSOPatch(GT_data,idx,bbox_intersection,patchBoxes)
-            catch
-                warning(sprintf('\nError with ID : %d',idx));
-            end
+            patch_script.makePSOPatch(GT_data,idx,bbox_intersection,patchBoxes)
         else
             warning('Image Not found.');
         end

@@ -111,11 +111,12 @@ img = insertShape(I,'rectangle',patchBox,'LineWidth',6,'Color','white');
 color = 255*jet(numPatches);
 for i = 1:numPatches
     gt_list = patchBox_gt{i};
-    x = patchBox(i,1);
-    y = patchBox(i,2);
-    gt_list(:,1) = gt_list(:,1) + x;
-    gt_list(:,2) = gt_list(:,2) + y;
-    img = insertShape(img,'rectangle',gt_list,'LineWidth',8,'Color',color(i,:));
+    if ~isempty(gt_list)
+        x = patchBox(i,1);
+        y = patchBox(i,2);
+        gt_list(:,1) = gt_list(:,1) + x;
+        gt_list(:,2) = gt_list(:,2) + y;
+        img = insertShape(img,'rectangle',gt_list,'LineWidth',8,'Color',color(i,:));
 %     if ~isempty(patchBox_extra{i})
 %         for j = 1:size(patchBox_extra{i},1)
 %             b = patchBox_extra{i}(j,:);
@@ -123,6 +124,7 @@ for i = 1:numPatches
 %             img = insertShape(img,'polygon',b,'LineWidth',8,'Color','black');
 %         end
 %     end
+    end
 end
 %figure;imshow(img);
 
