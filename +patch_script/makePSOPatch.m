@@ -217,32 +217,38 @@ for i = 1:size(gt_list,1)
     w = round(max(polyPoints(:, 1))) - x;
     h = round(max(polyPoints(:, 2))) - y;
     newList = [newList; [max(1,x-p_x) max(1,y-p_y) w h]];
-    
+ end   
     %make sure GT is INSIDE patchBox --sanity check
-    for j = 1:size(newList,1)
-        current_gt = newList(j,:);
-        if current_gt(1) < 1
-            current_gt(1) = 1;
-        end
-        if current_gt(2) < 1
-            current_gt(2) = 1;
-        end
-        if current_gt(1) + current_gt(3) >= patchBox(3)
-            current_gt(3) = min(patchBox(3),(current_gt(1) + current_gt(3))-1);
-        end
-        if current_gt(2) + current_gt(4) >= patchBox(4)
-            current_gt(4) = min(patchBox(4),(current_gt(2) + current_gt(4))-1);
-        end
-        newList(j,:) = current_gt;
+for j = 1:size(newList,1)
+    current_gt = newList(j,:);
+    if current_gt(1) < 1
+        current_gt(1) = 1;
     end
-    
+    if current_gt(2) < 1
+        current_gt(2) = 1;
+    end
+    if current_gt(1) + current_gt(3) == patchBox(3)
+        current_gt(3) = (current_gt(1) + current_gt(3))-2;
+    end
+    if current_gt(2) + current_gt(4) == patchBox(4)
+        current_gt(4) = (current_gt(2) + current_gt(4))-2;
+    end
+    if current_gt(1) + current_gt(3) > patchBox(3)
+        current_gt(3) = (patchBox(3) - current_gt(1))-1;
+    end
+    if current_gt(2) + current_gt(4) > patchBox(4)
+        current_gt(4) = (patchBox(4) - current_gt(2))-1;
+    end
+    newList(j,:) = current_gt;
+end
+
 %     %Extra
 %     out = xor(a1,a2);
 %     extra_poly = out.subtract(a1);
 %     vrtx = extra_poly.Vertices;
 %     % Pad with 0(nan later) to retain matrix size
 %     extraList(i,:) = padarray(reshape(vrtx',1,size(vrtx,1)*2),[0 12 - numel(vrtx)],'post');
-end
+
 extraList(extraList==0) = nan;
 % figure;imshow(insertShape(I,'rectangle',newList,'LineWidth',1,'Color',255*jet(8)));
 end
