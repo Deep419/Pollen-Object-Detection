@@ -36,15 +36,15 @@ function [averagePrecision, recall, precision, stats, conf_info] = statsCalculat
 %   overlap threshold for assigning a detection to a ground truth box. The
 %   overlap ratio is computed as the intersection over union. The default
 %   value is 0.5.
-v = ver('vision');
+vers = ver('vision');
 
 narginchk(2, 3);
 
 % Validate user inputs
-if v.Version == '8.1'
+if vers.Version == '8.1'
     vision.internal.detector.evaluationInputValidation(detectionResults, ...
         trainingData, mfilename, true, varargin{:});
-elseif v.Version == '8.0'
+elseif vers.Version == '8.0'
     vision.internal.detector.evaluationInputValidation(detectionResults, ...
         trainingData, mfilename, varargin{:});
 else
@@ -140,14 +140,14 @@ recall           = cell(numClasses, 1);
 
 % Compute the precision and recall for each class
 for c = 1 : numClasses
-    
+        
     labels = vertcat(stats(:,c).labels);
     scores = vertcat(stats(:,c).scores);
     numExpected = sum([stats(:,c).NumExpected]);
     % Validate user inputs
-    if v.Version == '8.1'
+    if vers.Version == '8.1'
         [ap, p, r] = vision.internal.detector.detectorPrecisionRecall(labels, numExpected, scores);
-    elseif v.Version == '8.0'
+    elseif vers.Version == '8.0'
         [ap, p, r] = vision.internal.detector.detectorPrecisionRecall(labels, scores, numExpected);
     else
         error('statsCalculator requires vertion verification');
