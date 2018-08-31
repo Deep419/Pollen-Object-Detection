@@ -75,15 +75,22 @@ for i = 1:height(trainingData) % I = image counter
         gtBoxPerClass = trainingData.(trainingData.Properties.VariableNames{j}){i};
         %detPerClass = current_stats.Detections;
         if ~isempty(gtBoxPerClass)
-            iou = bboxOverlapRatio(gtBoxPerClass, detectionResults.Boxes{i}, 'union');
+            iou = visionBboxIntersectByUnion(gtBoxPerClass, detectionResults.Boxes{i});
+            %iou = bboxOverlapRatio(gtBoxPerClass, detectionResults.Boxes{i}, 'union');
             for k = 1:size(iou,1)
                 [v, ~] = max( iou(k,:) );
                 if v < 0.5
                     missed_gt(j,1) = missed_gt(j,1) + 1;
                 end
             end
+            for k = 1:size(iou,2)
+                [v, ~] = max( iou(:,k) );
+                if v < 0.5
+                    low_iou_or_floating_pred(j) = low_iou_or_floating_pred(j) + 1;
+                end
+            end
         end
-        low_iou_or_floating_pred(j) = low_iou_or_floating_pred(j) + sum(isnan(current_stats.GroundTruthAssignments));
+        %low_iou_or_floating_pred(j) = low_iou_or_floating_pred(j) + sum(isnan(current_stats.GroundTruthAssignments));
         conf_mat(j,j) = conf_mat(j,j) + sum(~isnan(current_stats.GroundTruthAssignments));
         if isempty(current_stats.GroundTruthAssignments)
             conf_mat(col(i),j) = conf_mat(col(i),j) + size(current_stats.Detections,1);
