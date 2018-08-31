@@ -4,3 +4,4 @@ log/
 *.e*
 *.o*
 test.m
+scratch/
