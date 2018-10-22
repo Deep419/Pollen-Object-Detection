@@ -74,9 +74,8 @@ for i = 1:height(trainingData) % I = image counter
         current_stats = stats(i,j);
         gtBoxPerClass = trainingData.(trainingData.Properties.VariableNames{j}){i};
         %detPerClass = current_stats.Detections;
-        if ~isempty(gtBoxPerClass)
-            iou = visionBboxIntersectByUnion(gtBoxPerClass, detectionResults.Boxes{i});
-            %iou = bboxOverlapRatio(gtBoxPerClass, detectionResults.Boxes{i}, 'union');
+        if ~isempty(gtBoxPerClass)        
+            iou = bboxOverlapRatio(gtBoxPerClass, detectionResults.Boxes{i}, 'union');
             for k = 1:size(iou,1)
                 [v, ~] = max( iou(k,:) );
                 if v < 0.5
