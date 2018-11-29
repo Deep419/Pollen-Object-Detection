@@ -135,7 +135,7 @@ bbox = patchBox_gt; clear patchBox_gt
 
 fprintf('done | ');
 
-other_scripts.textprogressbar(sprintf('Creating patches for ID %s : ',id_num));
+textprogressbar(sprintf('Creating patches for ID %s : ',id_num));
 progressBar = numel(1:4:size(patchBox_imgs,1)*4);
 counter = 1;
 %% add aug script here
@@ -184,10 +184,10 @@ for aug_i = 1:4:size(patchBox_imgs,1)*4%15000
     imageFilename{aug_i+3,1} = fn;
     pollen{aug_i+3,1} = bbox_diag;
     imwrite(I_diag,fn);
-    other_scripts.textprogressbar((counter/progressBar)*100);
+    textprogressbar((counter/progressBar)*100);
     counter = counter + 1;
 end
-other_scripts.textprogressbar('done');
+textprogressbar('done');
 
 bbox = pollen; clear pollen;
 data_aug = table(imageFilename, bbox);

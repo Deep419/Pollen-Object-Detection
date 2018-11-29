@@ -67,7 +67,7 @@ box = GT_data.bbox{i};%{k,index};
 %box = box{1};
 %a=1; %a - index for boxes on cropping lines
 for m=1:size(box,1)     %m - number of bboxes for each picture
-    [bbox,e] = patch_script.bboxCalculation(box(m,:),C,R,bbox_intersection,bbox);
+    [bbox,e] = bboxCalculation(box(m,:),C,R,bbox_intersection,bbox);
     extra = [extra; e];
     
 end
@@ -117,7 +117,7 @@ bbox = bbox(:);
 fprintf('done | ');
 
 
-other_scripts.textprogressbar(sprintf('Creating patches for ID %s : ',id_num));
+textprogressbar(sprintf('Creating patches for ID %s : ',id_num));
 progressBar = numel(1:4:size(x_temp,1)*4);
 counter = 1;
 %% add aug script here
@@ -166,10 +166,10 @@ for aug_i = 1:4:size(x_temp,1)*4%15000
     imageFilename{aug_i+3,1} = fn;
     pollen{aug_i+3,1} = bbox_diag;
     imwrite(I_diag,fn);
-    other_scripts.textprogressbar((counter/progressBar)*100);
+    textprogressbar((counter/progressBar)*100);
     counter = counter + 1;
 end
-other_scripts.textprogressbar('done');
+textprogressbar('done');
 
 bbox = pollen; clear pollen;
 data_aug = table(imageFilename, bbox);

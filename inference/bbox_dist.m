@@ -1,3 +1,4 @@
+% Calculates distance between 2 bounding box
 function dist = bbox_dist(G, P)
             if isempty(P) || isempty(G)
                 dist = NaN;

@@ -1,4 +1,4 @@
-%% Dependencies : +f1_multiclass\*
+%% Dependencies : inference\*
 %% Last Version Verified : R2018a
 
 function [avg_f1,info, conf] = ...
@@ -58,7 +58,7 @@ end
 %[ap, rC, pC] = cal_DetectionPrecision(results, expectedResults);
 
 % -current custom with extra stats output-
-[averagePrecision, recall, precision, stats, conf] = f1_multiclass.statsCalculator( results, ...
+[averagePrecision, recall, precision, stats, conf] = statsCalculator( results, ...
     expectedResults);
 
 %info.data = detectData;

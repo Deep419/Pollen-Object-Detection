@@ -213,7 +213,7 @@ end
 PROPS.params.vis_prop = DIR.visualize_proposals;
 %cumprod([1 repelem(PROPS.params.BoxPyramidScale, PROPS.params.NumBoxPyramidLevels-1)])
 if VIS.trainingProposals
-    stats = vis.trainingSamples(PROPS.params, trainData(2:end,:));
+    stats = trainingSamples(PROPS.params, trainData(2:end,:));
     save(sprintf ('%s/proposal_stats.mat', DIR.output),'stats'); clear stats;
 end
 
@@ -278,13 +278,13 @@ while ( moreLoop == true )
     fn = sprintf ( '%s/frcnn_loop_%02d.mat', DIR.output, loopCt );
     save (fn,'detector');
     % check the performance
-    [f1Train , stats_train, conf_train] = f1_multiclass.main ( trainData, detector, 2000, ...
+    [f1Train , stats_train, conf_train] = crop_inference ( trainData, detector, 2000, ...
         VIS.trainResults, DIR.trainResults );
     TIME.F1AfterTrain(loopCt,:) = clock;
-    [f1Valid , stats_valid,conf_valid] = f1_multiclass.main ( validData , detector, 2000, ...
+    [f1Valid , stats_valid,conf_valid] = crop_inference ( validData , detector, 2000, ...
         VIS.validResults, DIR.validResults );
     TIME.F1AfterValid(loopCt,:) = clock;
-    [f1Test , stats_test,conf_test] = f1_multiclass.main ( testData, detector, 2000, ...
+    [f1Test , stats_test,conf_test] = crop_inference ( testData, detector, 2000, ...
         VIS.testResults, DIR.testResults );
     TIME.F1Stop(loopCt,:) = clock;
     fn = sprintf ( '%s/stats_%02d.mat', DIR.output, loopCt );

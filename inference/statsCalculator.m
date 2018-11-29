@@ -102,7 +102,7 @@ for i = 1:height(trainingData) % I = image counter
         end
         truePositiveDetections = current_stats.Detections(~isnan(current_stats.GroundTruthAssignments),:);
         truePositiveGT = gtBoxPerClass(temp,:);
-        stats(i,j).dist = f1_multiclass.bbox_dist(truePositiveGT, truePositiveDetections);
+        stats(i,j).dist = bbox_dist(truePositiveGT, truePositiveDetections);
     end
 end
 
