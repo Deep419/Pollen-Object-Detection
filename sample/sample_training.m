@@ -11,6 +11,7 @@ INFO.codeVersion = 'sample_training';
 INFO.title = 'This is a sample training script.';
 
 % Dataset
+DATASET.preloaded = 'YES'; %YES if you wanna load presplit data with all classes, NO if using any class 
 DATASET.type = 'GRID'; % GRID or PSO
 DATASET.size = 'one_each'; % FULL or one_each
 
@@ -77,18 +78,23 @@ addpath(genpath(DIR.pollenpath));
 
 
 %% 3.  LOAD DATASET
-if strcmp(DATASET.size,'FULL')
-    if strcmp(DATASET.type,'GRID')
-        load(fullfile(DIR.pollenpath,'misc_mat_data','grid_full_dataset.mat'));
-    else
-        load(fullfile(DIR.pollenpath,'misc_mat_data','pso_full_dataset.mat'));
+if strcmp(DATASET.preloaded,'YES')
+    if strcmp(DATASET.size,'FULL')
+        if strcmp(DATASET.type,'GRID')
+            load(fullfile(DIR.pollenpath,'misc_mat_data','grid_full_dataset.mat'));
+        else
+            load(fullfile(DIR.pollenpath,'misc_mat_data','pso_full_dataset.mat'));
+        end
+    else %one_each dataset
+        if strcmp(DATASET.type,'GRID')
+            load(fullfile(DIR.pollenpath,'misc_mat_data','grid_1per_dataset.mat'));
+        else
+            load(fullfile(DIR.pollenpath,'misc_mat_data','pso_1per_dataset.mat'));
+        end
     end
-else %one_each dataset
-    if strcmp(DATASET.type,'GRID')
-        load(fullfile(DIR.pollenpath,'misc_mat_data','grid_1per_dataset.mat'));
-    else
-        load(fullfile(DIR.pollenpath,'misc_mat_data','pso_1per_dataset.mat'));
-    end
+else
+    data = pollen_patch_picker_mc(pwd,'GRI','discrete',1);
+    [trainData,validData,testData,INFO.data_stats] = train_test_splitter(data);
 end
 
 trainData.imageFilename = fullfile(DIR.pollenpath,strrep(trainData.imageFilename,'\',filesep));
@@ -106,6 +112,7 @@ fprintf (' \n Time for Data Load :  %f \n', etime(TIME.AfterDataLoad , TIME.Scri
 if exist(fullfile(DIR.output,'stats_all.mat'))==2
     PARAM.trainType = 'FINETUNE';
     load(fullfile(DIR.output,'stats_all.mat'))
+    load(fullfile(DIR.output,'time_all.mat'))
     prevLoop = size(STATS.f1TrainV,2);
     loopCt = prevLoop + 1;
     load(fullfile(DIR.output,sprintf('frcnn_loop_%02d.mat',prevLoop)));

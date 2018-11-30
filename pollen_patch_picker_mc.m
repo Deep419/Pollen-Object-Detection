@@ -6,6 +6,10 @@ function gt_aug = pollen_patch_picker_mc (path,type,pattern,varargin)
 %   if PATTERN = CONTINOUS, nargin is multiple of 2, first is start, second
 %       is end
 %   if PATTERN = DISCRETE, nargin is specific id's
+%
+%   Example: pollen_patch_picker_mc(pwd,'GRI','discrete',1)
+%   Example: pollen_patch_picker_mc(pwd,'GRI','discrete',7,12)
+%   Example: pollen_patch_picker_mc(pwd,'GRI','continous',7,12,45,59) //Will include all classes between 7 and 12 and, 45 and 59
 
 switch type
     case 'GRI'
